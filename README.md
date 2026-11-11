@@ -50,4 +50,4 @@ Out of scope for v0.1: a web UI, persistent storage, running code produced by ag
 
 ## Status
 
-v0.1 (skeleton pipeline) is complete. All four agents are implemented and run end to end against the stub LLM: `agentforge "add a login page"` prints the result and a step log using canned demo responses. Next up is v0.2, connecting a real model provider.
+v0.1 (skeleton pipeline) is complete. All four agents are implemented and run end to end against the stub LLM: `agentforge "add a login page"` prints the result and a step log using canned demo responses. v0.3 (feedback loop) is also implemented against the stub LLM: when QA rejects a change, the Orchestrator sends it back to the Developer with the findings, up to `max_retries` (default 2) times, and the result reports the number of attempts and any failure reason. The v0.2 real model provider is still to come.

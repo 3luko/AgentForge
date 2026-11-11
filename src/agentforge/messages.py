@@ -43,6 +43,25 @@ class CodeChange:
 
 
 @dataclass(frozen=True)
+class DevelopmentRequest:
+    """Developer input: the plan, plus the rejected attempt and QA findings on a retry."""
+
+    plan: DesignPlan
+    previous: CodeChange | None = None
+    findings: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.findings, tuple) or not all(
+            isinstance(f, str) for f in self.findings
+        ):
+            raise TypeError("findings must be a tuple of strings")
+        if self.previous is None and self.findings:
+            raise ValueError("findings require a previous attempt")
+        if self.previous is not None and not self.findings:
+            raise ValueError("a previous attempt requires findings")
+
+
+@dataclass(frozen=True)
 class ReviewRequest:
     """QA input: the plan to check against and the changes to review."""
 
@@ -73,3 +92,5 @@ class RunResult:
     task: Task
     passed: bool
     steps: tuple[StepRecord, ...] = ()
+    attempts: int = 0
+    failure: str | None = None

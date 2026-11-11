@@ -7,13 +7,24 @@ This document describes how the code is organised. See the [README](../README.md
 ```
 Task ──► Orchestrator
             │
-            ├─► Architect   Task           ─► DesignPlan
-            ├─► Developer   DesignPlan     ─► CodeChange
-            └─► QA          ReviewRequest  ─► ReviewReport
-            │               (plan + changes)
+            ├─► Architect   Task               ─► DesignPlan
+            ├─► Developer   DevelopmentRequest ─► CodeChange    (repeated on QA rejection)
+            │               (plan + previous change + findings)
+            └─► QA          ReviewRequest      ─► ReviewReport
+                            (plan + changes)
             ▼
-         RunResult (passed + StepRecord log)
+         RunResult (passed, attempts, failure + StepRecord log)
 ```
+
+## Feedback loop (v0.3)
+
+The Orchestrator runs the Architect exactly once, then loops Developer -> QA until QA approves or the attempts run out. The total is `1 + max_retries` attempts (`max_retries` defaults to 2 and must be >= 0).
+
+- **`DevelopmentRequest`** is the Developer's input: the plan, plus (on a retry) the previous `CodeChange` and QA's findings. The first request has no previous change and no findings; a retry must have both, and the message rejects any other combination.
+- **Only the latest feedback is carried forward.** Attempt N sees attempt N-1's change and findings, not earlier ones.
+- **Readiness rule.** If the plan has no `files_to_change` or no `acceptance_criteria`, the Orchestrator stops after the Architect step without calling the Developer (`attempts == 0`, `failure` set).
+- **`RunResult.attempts` and `RunResult.failure`.** `attempts` counts Developer/QA rounds; `failure` is `None` on success and otherwise explains why the run failed (unready plan, or QA rejected every attempt with the last findings).
+- **Malformed output is not retried.** An `AgentOutputError` from any agent still propagates out of `Orchestrator.run`; retries only cover well-formed QA rejections.
 
 ## Modules
 

@@ -28,6 +28,9 @@ def format_result(result: RunResult) -> str:
         f"Task: {result.task.description}",
         f"Result: {'PASSED' if result.passed else 'FAILED'}",
     ]
+    lines.append(f"Attempts: {result.attempts}")
+    if result.failure:
+        lines.append(f"Failure: {result.failure}")
     for i, step in enumerate(result.steps, start=1):
         lines.append(f"{i}. {step.agent}: {_describe(step.output)}")
     return "\n".join(lines)

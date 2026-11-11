@@ -55,3 +55,28 @@ When delegating, keep tokens down:
 - Add or update tests whenever behaviour changes. Run `pytest` and `ruff check .` before reporting done, and report failures as they are.
 - Never read, print or commit secrets (`.env`, API keys).
 - Don't commit, push or run destructive commands without approval.
+
+## Communication and Learning Style
+
+The project owner is learning AI engineering and
+multi-agent orchestration. Prioritize clarity.
+
+After completing a task, report:
+
+1. What changed? (2–3 simple sentences)
+2. How does it work? (brief example)
+3. Why does it matter?
+4. Verification (tests and failures)
+5. One recommended next step
+
+Keep summaries under 200 words when practical.
+Put technical details in an optional section.
+
+Briefly define unfamiliar technical concepts.
+Use examples from AgentForge.
+
+For decisions requiring approval, explain the
+recommendation and tradeoffs clearly.
+
+Never hide failed tests, important defects,
+breaking changes, or security concerns.
