@@ -6,7 +6,7 @@ from agentforge.agents.architect import Architect
 from agentforge.agents.base import Agent
 from agentforge.agents.developer import Developer
 from agentforge.agents.qa import QA
-from agentforge.messages import RunResult, Task
+from agentforge.messages import ReviewRequest, RunResult, StepRecord, Task
 
 
 class Orchestrator(Agent[Task, RunResult]):
@@ -24,4 +24,15 @@ class Orchestrator(Agent[Task, RunResult]):
         self.qa = qa
 
     def run(self, message: Task) -> RunResult:
-        raise NotImplementedError("Orchestrator agent is not implemented yet")
+        plan = self.architect.run(message)
+        change = self.developer.run(plan)
+        report = self.qa.run(ReviewRequest(plan=plan, changes=change))
+        return RunResult(
+            task=message,
+            passed=report.passed,
+            steps=(
+                StepRecord(self.architect.name, plan),
+                StepRecord(self.developer.name, change),
+                StepRecord(self.qa.name, report),
+            ),
+        )
