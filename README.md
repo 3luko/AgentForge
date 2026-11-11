@@ -50,4 +50,4 @@ Out of scope for v0.1: a web UI, persistent storage, running code produced by ag
 
 ## Status
 
-Planning stage. The project structure is being decided and no agents are implemented yet.
+v0.1 (skeleton pipeline) is complete. All four agents are implemented and run end to end against the stub LLM: `agentforge "add a login page"` prints the result and a step log using canned demo responses. Next up is v0.2, connecting a real model provider.

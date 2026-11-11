@@ -23,6 +23,7 @@ Task ──► Orchestrator
 | `agentforge/agents/base.py` | `Agent[InputT, OutputT]`, an abstract base with a single `run(message)` method. |
 | `agentforge/agents/*.py` | One agent per file. Each declares its input and output message types. |
 | `agentforge/llm.py` | The `LLMClient` protocol and `StubLLMClient` for tests. |
+| `agentforge/demo.py` | Canned stub responses the CLI uses until a real LLM is connected (v0.2). |
 | `agentforge/cli.py` | Wires the agents together and runs a task from the command line. |
 
 ## Design decisions

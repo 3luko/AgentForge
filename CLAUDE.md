@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-AgentForge is a learning/portfolio project: a multi-agent pipeline (orchestrator, architect, developer, QA) that turns a feature request into reviewed code. `README.md` has the goal, scope and milestones. `docs/architecture.md` has the module layout and design decisions. The agents are currently stubs that raise `NotImplementedError`.
+AgentForge is a learning/portfolio project: a multi-agent pipeline (orchestrator, architect, developer, QA) that turns a feature request into reviewed code. `README.md` has the goal, scope and milestones. `docs/architecture.md` has the module layout and design decisions. v0.1 is complete: the agents run end to end against `StubLLMClient` (the CLI uses canned responses from `demo.py`).
 
 ## Commands
 
