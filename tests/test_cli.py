@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from agentforge.cli import main
 from agentforge.demo import DEMO_RESPONSES
 from agentforge.llm import StubLLMClient
@@ -35,3 +37,19 @@ def test_prints_failed_result_with_issues(capsys) -> None:
 def test_notes_stub_llm_on_stderr(capsys) -> None:
     main(["x"])
     assert "stub LLM" in capsys.readouterr().err
+
+
+def test_max_retries_option_limits_attempts(capsys) -> None:
+    fail = json.dumps({"passed": False, "issues": ["no form"]})
+    responses = (*DEMO_RESPONSES[:2], fail)
+    assert main(["x", "--max-retries", "0"], llm=StubLLMClient(responses)) == 0
+    out = capsys.readouterr().out
+    assert "Attempts: 1" in out
+    assert "FAILED" in out
+
+
+def test_negative_max_retries_is_rejected(capsys) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["x", "--max-retries", "-1"])
+    assert exc.value.code == 2
+    assert "--max-retries" in capsys.readouterr().err

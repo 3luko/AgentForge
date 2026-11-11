@@ -42,12 +42,22 @@ def main(argv: Sequence[str] | None = None, llm: LLMClient | None = None) -> int
         description="Turn a feature request into reviewed code using a team of agents.",
     )
     parser.add_argument("request", help="the feature request to build")
+    parser.add_argument(
+        "--max-retries",
+        type=int,
+        default=2,
+        help="Developer retries allowed after QA rejects a change (default: 2)",
+    )
     args = parser.parse_args(argv)
+    if args.max_retries < 0:
+        parser.error("--max-retries must be 0 or greater")
 
     if llm is None:
         print("Running against the stub LLM (canned demo responses).", file=sys.stderr)
         llm = demo_llm()
-    orchestrator = Orchestrator(Architect(llm), Developer(llm), QA(llm))
+    orchestrator = Orchestrator(
+        Architect(llm), Developer(llm), QA(llm), max_retries=args.max_retries
+    )
 
     try:
         result = orchestrator.run(Task(description=args.request))
