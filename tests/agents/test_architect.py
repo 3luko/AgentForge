@@ -3,6 +3,7 @@ import json
 import pytest
 
 from agentforge.agents import Agent, Architect
+from agentforge.agents.architect import SYSTEM_PROMPT
 from agentforge.agents.base import AgentOutputError
 from agentforge.llm import StubLLMClient
 from agentforge.messages import DesignPlan, Task
@@ -60,3 +61,43 @@ def test_architect_rejects_wrong_typed_lists(key: str) -> None:
     body = {"summary": "s", key: "not a list"}
     with pytest.raises(AgentOutputError):
         Architect(StubLLMClient([json.dumps(body)])).run(Task("t"))
+
+
+def test_architect_passes_system_prompt() -> None:
+    architect, llm = _arch('{"summary": "s"}')
+    architect.run(Task("x"))
+    assert len(llm.calls) == 1
+    assert llm.calls[0][0] == SYSTEM_PROMPT
+
+
+@pytest.mark.parametrize("summary", ["", " ", "\n\t "])
+def test_architect_rejects_blank_summary(summary: str) -> None:
+    architect, _ = _arch(json.dumps({"summary": summary}))
+    with pytest.raises(AgentOutputError, match="'summary' must not be blank"):
+        architect.run(Task("x"))
+
+
+@pytest.mark.parametrize("key", ["files_to_change", "acceptance_criteria"])
+@pytest.mark.parametrize("blank", ["", "   "])
+def test_architect_rejects_blank_list_entries(key: str, blank: str) -> None:
+    architect, _ = _arch(json.dumps({"summary": "s", key: ["ok", blank]}))
+    with pytest.raises(AgentOutputError, match=f"'{key}' must not contain blank entries"):
+        architect.run(Task("x"))
+
+
+@pytest.mark.parametrize("key", ["files_to_change", "acceptance_criteria"])
+def test_architect_rejects_duplicate_list_entries(key: str) -> None:
+    architect, _ = _arch(json.dumps({"summary": "s", key: ["a", "b", "a"]}))
+    with pytest.raises(AgentOutputError, match=f"'{key}' must not contain duplicate entries"):
+        architect.run(Task("x"))
+
+
+def test_architect_preserves_list_order() -> None:
+    body = {
+        "summary": "s",
+        "files_to_change": ["z.py", "a.py", "m.py"],
+        "acceptance_criteria": ["third", "first", "second"],
+    }
+    plan = _arch(json.dumps(body))[0].run(Task("x"))
+    assert plan.files_to_change == ("z.py", "a.py", "m.py")
+    assert plan.acceptance_criteria == ("third", "first", "second")
